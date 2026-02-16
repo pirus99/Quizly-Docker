@@ -73,7 +73,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     depends_on:
-      db:
+      coderrdb:
         condition: service_healthy
     networks:
       - app-network
