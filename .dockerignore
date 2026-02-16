@@ -1,0 +1,51 @@
+# Exclude application code directories (cloned by Docker from Git)
+backend/
+frontend/
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Environment files
+.env
+.env.*
+
+# Docker
+docker-compose.override.yml
+
+# Documentation
+*.md
+
+# Python
+__pycache__
+*.py[cod]
+*.pyc
+venv/
+env/
+
+# Node
+node_modules/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Database
+*.sqlite3
+postgres_data/
+
+# Backups
+backup_*.sql
+
+# CI/CD
+.github/
+.gitlab-ci.yml

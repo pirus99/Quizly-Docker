@@ -1,0 +1,29 @@
+# Application code directories (cloned from Git during Docker build)
+backend/
+frontend/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker
+docker-compose.override.yml
+
+# Docker volumes
+postgres_data/
+
+# Logs
+*.log
+logs/
+
+# Backups
+backup_*.sql
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  # Traefik Reverse Proxy
+  traefik:
+    image: traefik:v2.11
+    container_name: ${PROJECT_NAME:-app}_traefik
+    command:
+      # Enable Docker provider
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      # Entry points
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # API and Dashboard
+      - "--api.dashboard=${TRAEFIK_DASHBOARD:-false}"
+      - "--api.insecure=${TRAEFIK_DASHBOARD:-false}"
+      # Logging
+      - "--log.level=${TRAEFIK_LOG_LEVEL:-INFO}"
+      - "--accesslog=${TRAEFIK_ACCESS_LOG:-false}"
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+      - "${TRAEFIK_DASHBOARD_PORT:-8080}:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: ${PROJECT_NAME:-app}_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Django Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      args:
+        BACKEND_REPO_URL: ${BACKEND_REPO_URL}
+        BACKEND_REPO_BRANCH: ${BACKEND_REPO_BRANCH:-main}
+    container_name: ${PROJECT_NAME:-app}_backend
+    environment:
+      # Django settings
+      SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DEBUG: ${DJANGO_DEBUG:-False}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      # CORS
+      CORS_ALLOW_ALL_ORIGINS: ${CORS_ALLOW_ALL_ORIGINS:-True}
+      # Superuser (optional)
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-}
+      # PostgreSQL vars for entrypoint script
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      # API routes
+      - "traefik.http.routers.backend-api.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/api/`)"
+      - "traefik.http.routers.backend-api.entrypoints=web"
+      - "traefik.http.routers.backend-api.service=backend"
+      # Admin routes
+      - "traefik.http.routers.backend-admin.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/admin/`)"
+      - "traefik.http.routers.backend-admin.entrypoints=web"
+      - "traefik.http.routers.backend-admin.service=backend"
+      # Static files routes
+      - "traefik.http.routers.backend-static.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/static/`)"
+      - "traefik.http.routers.backend-static.entrypoints=web"
+      - "traefik.http.routers.backend-static.service=backend"
+      # Service
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+
+  # Frontend (Nginx)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        FRONTEND_REPO_URL: ${FRONTEND_REPO_URL}
+        FRONTEND_REPO_BRANCH: ${FRONTEND_REPO_BRANCH:-main}
+    container_name: ${PROJECT_NAME:-app}_frontend
+    environment:
+      # Frontend configuration
+      API_BASE_URL: ${FRONTEND_API_URL:-/api/}
+      STATIC_BASE_URL: ${FRONTEND_STATIC_URL:-/}
+    networks:
+      - app-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      # Default route (catch-all)
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.priority=1"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

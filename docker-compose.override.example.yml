@@ -1,0 +1,52 @@
+# docker-compose.override.example.yml
+# 
+# This file provides an example override configuration for development.
+# Copy this to docker-compose.override.yml to use it (it will be automatically loaded).
+# 
+# Usage:
+#   cp docker-compose.override.example.yml docker-compose.override.yml
+#
+# Note: docker-compose.override.yml is gitignored by default
+
+version: '3.8'
+
+services:
+  # Backend development overrides
+  backend:
+    # Enable Django debug mode
+    environment:
+      DEBUG: "True"
+    # Mount local backend code for live reload (requires cloning backend repo locally)
+    # volumes:
+    #   - ./backend:/app
+    # Expose backend port directly for debugging
+    ports:
+      - "8000:8000"
+  
+  # Frontend development overrides
+  frontend:
+    # Mount local frontend code for live development (requires cloning frontend repo locally)
+    # volumes:
+    #   - ./frontend:/usr/share/nginx/html
+    # Expose frontend port directly
+    ports:
+      - "8080:80"
+  
+  # Database development overrides
+  db:
+    # Expose database port for local access
+    ports:
+      - "5432:5432"
+  
+  # Traefik development overrides
+  traefik:
+    # Enable dashboard
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--log.level=DEBUG"
+      - "--accesslog=true"
