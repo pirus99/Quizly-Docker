@@ -2,9 +2,9 @@ version: '3.8'
 
 services:
   # Traefik Reverse Proxy
-  traefik:
+  coderrtraefik:
     image: traefik:v2.11
-    container_name: ${PROJECT_NAME:-app}_traefik
+    container_name: ${PROJECT_NAME:-app}_coderrtraefik
     command:
       # Enable Docker provider
       - "--providers.docker=true"
@@ -29,9 +29,9 @@ services:
     restart: unless-stopped
 
   # PostgreSQL Database
-  db:
+  coderrdb:
     image: postgres:16-alpine
-    container_name: ${PROJECT_NAME:-app}_db
+    container_name: ${PROJECT_NAME:-app}_coderrdb
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -48,14 +48,14 @@ services:
       retries: 5
 
   # Django Backend
-  backend:
+  coderrbackend:
     build:
       context: .
       dockerfile: Dockerfile.backend
       args:
         BACKEND_REPO_URL: ${BACKEND_REPO_URL}
         BACKEND_REPO_BRANCH: ${BACKEND_REPO_BRANCH:-main}
-    container_name: ${PROJECT_NAME:-app}_backend
+    container_name: ${PROJECT_NAME:-app}_coderrbackend
     environment:
       # Django settings
       SECRET_KEY: ${DJANGO_SECRET_KEY}
@@ -83,27 +83,27 @@ services:
       # API routes
       - "traefik.http.routers.backend-api.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/api/`)"
       - "traefik.http.routers.backend-api.entrypoints=web"
-      - "traefik.http.routers.backend-api.service=backend"
+      - "traefik.http.routers.backend-api.service=coderrbackend"
       # Admin routes
       - "traefik.http.routers.backend-admin.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/admin/`)"
       - "traefik.http.routers.backend-admin.entrypoints=web"
-      - "traefik.http.routers.backend-admin.service=backend"
+      - "traefik.http.routers.backend-admin.service=coderrbackend"
       # Static files routes
       - "traefik.http.routers.backend-static.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/static/`)"
       - "traefik.http.routers.backend-static.entrypoints=web"
-      - "traefik.http.routers.backend-static.service=backend"
+      - "traefik.http.routers.backend-static.service=coderrbackend"
       # Service
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
 
   # Frontend (Nginx)
-  frontend:
+  coderrfrontend:
     build:
       context: .
       dockerfile: Dockerfile.frontend
       args:
         FRONTEND_REPO_URL: ${FRONTEND_REPO_URL}
         FRONTEND_REPO_BRANCH: ${FRONTEND_REPO_BRANCH:-main}
-    container_name: ${PROJECT_NAME:-app}_frontend
+    container_name: ${PROJECT_NAME:-app}_coderrfrontend
     environment:
       # Frontend configuration
       API_BASE_URL: ${FRONTEND_API_URL:-/api/}
@@ -117,7 +117,7 @@ services:
       - "traefik.http.routers.frontend.rule=Host(`${DOMAIN:-localhost}`)"
       - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.routers.frontend.priority=1"
-      - "traefik.http.routers.frontend.service=frontend"
+      - "traefik.http.routers.frontend.service=coderrfrontend"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
 
 networks:
