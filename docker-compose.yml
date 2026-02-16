@@ -28,24 +28,7 @@ services:
       - app-network
     restart: unless-stopped
 
-  # PostgreSQL Database
-  coderrdb:
-    image: postgres:16-alpine
-    container_name: ${PROJECT_NAME:-app}_coderrdb
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - app-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  # Using SQLite (built-in Django DB) instead of PostgreSQL
 
   # Django Backend
   coderrbackend:
@@ -61,20 +44,17 @@ services:
       SECRET_KEY: ${DJANGO_SECRET_KEY}
       DEBUG: ${DJANGO_DEBUG:-False}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
-      # Database
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      # Database: use SQLite stored in a named volume
+      DATABASE_URL: sqlite:////data/db.sqlite3
       # CORS
       CORS_ALLOW_ALL_ORIGINS: ${CORS_ALLOW_ALL_ORIGINS:-True}
       # Superuser (optional)
       DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-}
       DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-}
       DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-}
-      # PostgreSQL vars for entrypoint script
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    depends_on:
-      coderrdb:
-        condition: service_healthy
+    volumes:
+      - sqlite_data:/data
+    depends_on: []
     networks:
       - app-network
     restart: unless-stopped
@@ -125,4 +105,4 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data:
+  sqlite_data:

@@ -3,13 +3,11 @@ set -e
 
 echo "Starting Coderr Backend..."
 
-# Wait for database to be ready
-echo "Waiting for PostgreSQL to be ready..."
-while ! pg_isready -h db -U ${POSTGRES_USER:-postgres} > /dev/null 2>&1; do
-    echo "PostgreSQL is unavailable - sleeping"
-    sleep 1
-done
-echo "PostgreSQL is ready!"
+# Ensure data directory exists for SQLite
+echo "Ensuring /data directory for SQLite exists..."
+mkdir -p /data
+chmod 755 /data || true
+
 
 # Run database migrations
 echo "Running database migrations..."
