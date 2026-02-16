@@ -81,19 +81,19 @@ services:
     labels:
       - "traefik.enable=true"
       # API routes
-      - "traefik.http.routers.backend-api.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/api/`)"
-      - "traefik.http.routers.backend-api.entrypoints=web"
-      - "traefik.http.routers.backend-api.service=coderrbackend"
+      - "traefik.http.routers.coderrbackend-api.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/api/`)"
+      - "traefik.http.routers.coderrbackend-api.entrypoints=web"
+      - "traefik.http.routers.coderrbackend-api.service=coderrbackend"
       # Admin routes
-      - "traefik.http.routers.backend-admin.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/admin/`)"
-      - "traefik.http.routers.backend-admin.entrypoints=web"
-      - "traefik.http.routers.backend-admin.service=coderrbackend"
+      - "traefik.http.routers.coderrbackend-admin.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/admin/`)"
+      - "traefik.http.routers.coderrbackend-admin.entrypoints=web"
+      - "traefik.http.routers.coderrbackend-admin.service=coderrbackend"
       # Static files routes
-      - "traefik.http.routers.backend-static.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/static/`)"
-      - "traefik.http.routers.backend-static.entrypoints=web"
-      - "traefik.http.routers.backend-static.service=coderrbackend"
+      - "traefik.http.routers.coderrbackend-static.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/static/`)"
+      - "traefik.http.routers.coderrbackend-static.entrypoints=web"
+      - "traefik.http.routers.coderrbackend-static.service=coderrbackend"
       # Service
-      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      - "traefik.http.services.coderrbackend.loadbalancer.server.port=8000"
 
   # Frontend (Nginx)
   coderrfrontend:
@@ -114,11 +114,11 @@ services:
     labels:
       - "traefik.enable=true"
       # Default route (catch-all)
-      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN:-localhost}`)"
-      - "traefik.http.routers.frontend.entrypoints=web"
-      - "traefik.http.routers.frontend.priority=1"
-      - "traefik.http.routers.frontend.service=coderrfrontend"
-      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.coderrfrontend.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.coderrfrontend.entrypoints=web"
+      - "traefik.http.routers.coderrfrontend.priority=1"
+      - "traefik.http.routers.coderrfrontend.service=coderrfrontend"
+      - "traefik.http.services.coderrfrontend.loadbalancer.server.port=80"
 
 networks:
   app-network:
