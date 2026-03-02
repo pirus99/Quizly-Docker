@@ -10,7 +10,7 @@ echo "Configuring frontend with API_BASE_URL: $API_URL"
 
 # Update config.js with environment variables
 if [ -f /usr/share/nginx/html/shared/js/config.js ]; then
-    sed -i "s|const API_BASE_URL = '.*';|const API_BASE_URL = '$API_URL';|g" /usr/share/nginx/html/shared/js/config.js
+    sed -i "s|const API_BASE_URL = \".*\";|const API_BASE_URL = \"$API_URL\";|g" /usr/share/nginx/html/shared/js/config.js
     echo "✅ config.js updated successfully"
 else
     echo "⚠️  Warning: config.js not found at expected location"
