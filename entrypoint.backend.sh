@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Starting Coderr Backend..."
+echo "Starting Quizly Backend..."
 
 # Ensure data directory exists for SQLite
 echo "Ensuring /data directory for SQLite exists..."
