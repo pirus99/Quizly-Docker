@@ -8,20 +8,19 @@ echo "Ensuring /data directory for SQLite exists..."
 mkdir -p /data
 chmod 755 /data || true
 
-
 # Run database migrations
 echo "Running database migrations..."
-python manage.py makemigrations --noinput
-python manage.py migrate --noinput
+python3 manage.py makemigrations --noinput
+python3 manage.py migrate --noinput
 
 # Collect static files
 echo "Collecting static files..."
-python manage.py collectstatic --noinput
+python3 manage.py collectstatic --noinput
 
 # Create superuser if it doesn't exist (optional, for initial setup)
 if [ ! -z "$DJANGO_SUPERUSER_USERNAME" ] && [ ! -z "$DJANGO_SUPERUSER_PASSWORD" ] && [ ! -z "$DJANGO_SUPERUSER_EMAIL" ]; then
     echo "Creating superuser..."
-    python manage.py shell -c "
+    python3 manage.py shell -c "
 from django.contrib.auth import get_user_model;
 User = get_user_model();
 if not User.objects.filter(username='$DJANGO_SUPERUSER_USERNAME').exists():
@@ -33,4 +32,4 @@ else:
 fi
 
 echo "Starting Gunicorn..."
-exec gunicorn --bind 0.0.0.0:8000 --workers 4 --timeout 120 core.wsgi:application
+exec gunicorn --bind 0.0.0.0:8000 --workers 4 --timeout 120 core.wsgi
