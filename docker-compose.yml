@@ -2,9 +2,9 @@ version: '3.8'
 
 services:
   # Traefik Reverse Proxy
-  coderrtraefik:
+  quizlytraefik:
     image: traefik:v2.11
-    container_name: ${PROJECT_NAME:-app}_coderrtraefik
+    container_name: ${PROJECT_NAME:-app}_quizlytraefik
     command:
       # Enable Docker provider
       - "--providers.docker=true"
@@ -28,17 +28,15 @@ services:
       - app-network
     restart: unless-stopped
 
-  # Using SQLite (built-in Django DB) instead of PostgreSQL
-
   # Django Backend
-  coderrbackend:
+  quizlybackend:
     build:
       context: .
       dockerfile: Dockerfile.backend
       args:
         BACKEND_REPO_URL: ${BACKEND_REPO_URL}
         BACKEND_REPO_BRANCH: ${BACKEND_REPO_BRANCH:-main}
-    container_name: ${PROJECT_NAME:-app}_coderrbackend
+    container_name: ${PROJECT_NAME:-app}_quizlybackend
     environment:
       # Django settings
       SECRET_KEY: ${DJANGO_SECRET_KEY}
@@ -61,29 +59,29 @@ services:
     labels:
       - "traefik.enable=true"
       # API routes
-      - "traefik.http.routers.coderrbackend-api.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/api/`)"
-      - "traefik.http.routers.coderrbackend-api.entrypoints=web"
-      - "traefik.http.routers.coderrbackend-api.service=coderrbackend"
+      - "traefik.http.routers.quizlybackend-api.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/api/`)"
+      - "traefik.http.routers.quizlybackend-api.entrypoints=web"
+      - "traefik.http.routers.quizlybackend-api.service=quizlybackend"
       # Admin routes
-      - "traefik.http.routers.coderrbackend-admin.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/admin/`)"
-      - "traefik.http.routers.coderrbackend-admin.entrypoints=web"
-      - "traefik.http.routers.coderrbackend-admin.service=coderrbackend"
+      - "traefik.http.routers.quizlybackend-admin.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/admin/`)"
+      - "traefik.http.routers.quizlybackend-admin.entrypoints=web"
+      - "traefik.http.routers.quizlybackend-admin.service=quizlybackend"
       # Static files routes
-      - "traefik.http.routers.coderrbackend-static.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/static/`)"
-      - "traefik.http.routers.coderrbackend-static.entrypoints=web"
-      - "traefik.http.routers.coderrbackend-static.service=coderrbackend"
+      - "traefik.http.routers.quizlybackend-static.rule=Host(`${DOMAIN:-localhost}`) && PathPrefix(`/static/`)"
+      - "traefik.http.routers.quizlybackend-static.entrypoints=web"
+      - "traefik.http.routers.quizlybackend-static.service=quizlybackend"
       # Service
-      - "traefik.http.services.coderrbackend.loadbalancer.server.port=8000"
+      - "traefik.http.services.quizlybackend.loadbalancer.server.port=8000"
 
   # Frontend (Nginx)
-  coderrfrontend:
+  quizlyfrontend:
     build:
       context: .
       dockerfile: Dockerfile.frontend
       args:
         FRONTEND_REPO_URL: ${FRONTEND_REPO_URL}
         FRONTEND_REPO_BRANCH: ${FRONTEND_REPO_BRANCH:-main}
-    container_name: ${PROJECT_NAME:-app}_coderrfrontend
+    container_name: ${PROJECT_NAME:-app}_quizlyfrontend
     environment:
       # Frontend configuration
       API_BASE_URL: ${FRONTEND_API_URL:-/api/}
@@ -94,11 +92,11 @@ services:
     labels:
       - "traefik.enable=true"
       # Default route (catch-all)
-      - "traefik.http.routers.coderrfrontend.rule=Host(`${DOMAIN:-localhost}`)"
-      - "traefik.http.routers.coderrfrontend.entrypoints=web"
-      - "traefik.http.routers.coderrfrontend.priority=1"
-      - "traefik.http.routers.coderrfrontend.service=coderrfrontend"
-      - "traefik.http.services.coderrfrontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.quizlyfrontend.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.quizlyfrontend.entrypoints=web"
+      - "traefik.http.routers.quizlyfrontend.priority=1"
+      - "traefik.http.routers.quizlyfrontend.service=quizlyfrontend"
+      - "traefik.http.services.quizlyfrontend.loadbalancer.server.port=80"
 
 networks:
   app-network:
