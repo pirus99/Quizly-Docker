@@ -1,5 +1,5 @@
 # Backend Dockerfile
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -9,11 +9,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 # Install git and other dependencies
 RUN apt-get update && \
-    apt-get install -y ffmpeg && \
-    apt-get install -y --no-install-recommends \
-    git \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /var/lib/apt/lists/*
+    apt-get install -y ffmpeg git gunicorn 
 
 # Set work directory
 WORKDIR /app
@@ -25,7 +21,7 @@ RUN git clone --branch ${BACKEND_REPO_BRANCH} ${BACKEND_REPO_URL} /app
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+    pip install -r /app/requirements.txt
 
 # Create directory for static files
 RUN mkdir -p /app/staticfiles

@@ -11,6 +11,7 @@ chmod 755 /data || true
 
 # Run database migrations
 echo "Running database migrations..."
+python manage.py makemigrations --noinput
 python manage.py migrate --noinput
 
 # Collect static files
