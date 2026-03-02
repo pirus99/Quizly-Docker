@@ -5,7 +5,6 @@ echo "Starting Coderr Frontend..."
 
 # Get API URL from environment or use default
 API_URL="${API_BASE_URL:-http://localhost/api/}"
-STATIC_URL="${STATIC_BASE_URL:-http://localhost/}"
 
 echo "Configuring frontend with API_BASE_URL: $API_URL"
 
