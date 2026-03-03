@@ -51,7 +51,7 @@ services:
       DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-}
       DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-}
     volumes:
-      - sqlite_data:/data
+      - backend_data:/app
     depends_on: []
     networks:
       - app-network
@@ -103,4 +103,4 @@ networks:
     driver: bridge
 
 volumes:
-  sqlite_data:
+  backend_data:
