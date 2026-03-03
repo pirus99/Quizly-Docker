@@ -23,7 +23,8 @@ ARG BACKEND_REPO_BRANCH=main
 RUN git clone --branch ${BACKEND_REPO_BRANCH} ${BACKEND_REPO_URL} /app
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt --break-system-packages
+RUN pip install --no-cache-dir -r requirements.txt --break-system-packages && \
+    pip install -U "yt-dlp[default]" --break-system-packages
 
 # Create directory for static files
 RUN mkdir -p /app/staticfiles
